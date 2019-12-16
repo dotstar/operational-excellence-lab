@@ -1,0 +1,26 @@
+#!/bin/bash
+while IFS= read -r file
+do
+echo git update-index --chmod=+x "$file"
+git update-index --chmod=+x "$file"
+done << EOF
+bootstrap/associate-profile
+bootstrap/codecommit/clone
+bootstrap/codecommit/push
+bootstrap/dashboard/build-dashboard
+bootstrap/dashboard/setup
+bootstrap/ddb/dynamodb-table.json
+bootstrap/ddb/load-ddb
+bootstrap/ddb/populate-dynamodb.json
+bootstrap/docker/build-containers
+bootstrap/docker/create-fargate-service
+bootstrap/docker/service-template.json
+bootstrap/docker/update-service-json
+bootstrap/fetch-outputs
+bootstrap/secondary-region/codecommit/push
+bootstrap/secondary-region/fetch-outputs
+bootstrap/secondary-region/setup
+bootstrap/setup
+bootstrap/update-ryder
+lab-1-xray/utils/ryder.py
+EOF

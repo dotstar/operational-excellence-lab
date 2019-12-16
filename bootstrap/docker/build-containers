@@ -1,0 +1,23 @@
+#!/bin/bash
+
+CORE_SERVICE_ECR_REPO=$(jq < cfn-output.json -r '.CoreServiceEcrRepo')
+LIKE_SERVICE_ECR_REPO=$(jq < cfn-output.json -r '.LikeServiceEcrRepo')
+API_ENDPOINT=$(jq < cfn-output.json -er '.LoadBalancerDNS')
+
+if which gsed; then
+  sed_cmd=gsed
+else
+  sed_cmd=sed
+fi
+
+sed_prog="s|REPLACE_ME_API_ENDPOINT|http://$API_ENDPOINT|;"
+$sed_cmd -i $sed_prog app/mysfits-service/service/mythicalMysfitsService.py
+
+$(aws ecr get-login --no-include-email)
+
+# Nov 27, 2019 - Mui
+# We used to build container images here, but that's now handled by the CI/CD
+# pipeline for core and like services. Login to ECR is still performed for 
+# convenience in case we add any modules that would require direct interaction 
+# with ECR. Also, AWS now provides a managed X-Ray daemon container image, so 
+# building that is no longer necessary.
