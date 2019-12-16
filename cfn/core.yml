@@ -416,8 +416,8 @@ Resources:
       SubnetId: !Ref PublicSubnetOne
       Repositories:
         - 
-          PathComponent: "/aws-multi-region-bc-dr-workshop"
-          RepositoryUrl: "https://github.com/dotstar/aws-multi-region-bc-dr-workshop.git"
+          PathComponent: "/operational-excellence-lab"
+          RepositoryUrl: "https://github.com/dotstar/operational-excellence-lab"
 
   CoreServiceRepo:
     Type: AWS::ECR::Repository

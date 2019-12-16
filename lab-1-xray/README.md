@@ -29,7 +29,7 @@ The Mythical Mysfits application is made up of (2) microservices:
 1. The **Mysfits service** (also referred to as the **_Core service_**) serves the Angular front-end application and hosts an API that returns Mysfit profiles from DynamoDB.
 2. The **Like service** tracks the number of likes for a particular mysfit. When a visitor clicks on the heart icon next to a mysfit in the app, a counter for that mysfit's profile is incremented in DynamoDB.
 
-Because of time constraints, we have pre-baked the micro-services instrumentation for X-Ray.  Should you like to learn more about this process, please look at the source code in  __~/environment/aws-multi-region-bc-dr-workshop/app/like-service/service/mysfits_like.py__ .  Alternatively, visit the full workshop on [github](https://github.com/aws-samples/aws-multi-region-bc-dr-workshop).
+Because of time constraints, we have pre-baked the micro-services instrumentation for X-Ray.  Should you like to learn more about this process, please look at the source code in  __~/environment/operational-excellence-lab/app/like-service/service/mysfits_like.py__ .  Alternatively, visit the full workshop on [github](https://github.com/aws-samples/operational-excellence-lab).
 
 ### Instructions
 
@@ -42,7 +42,7 @@ Now that you've instrumented the like service, you should see additional trace d
 1. Make sure you know the DNS endpoint for the service.  You can find this as follows:
 
     ```
-     cat ~/environment/aws-multi-region-bc-dr-workshop/cfn-output.json | grep LoadBalancerDNS
+     cat ~/environment/operational-excellence-lab/cfn-output.json | grep LoadBalancerDNS
     ```
     Note: You can also visit the CloudFormation dashboard, click on the workshop stack and find LoadBalancerDNS in the outputs tab.
 
@@ -59,13 +59,13 @@ Now that you've instrumented the like service, you should see additional trace d
 4. Generate some workload on the service.  There is a workload generator in ~/environments/ryder.  Run ryder to stream GETS and PUTS to the core and like services.  The script will automatically stop after generating 2500 POST requests, so re-run as needed. `Ctrl-C` will kill the process, if desired.
 
 ```
-  ~/environment/aws-multi-region-bc-dr-workshop/ryder
+  ~/environment/operational-excellence-lab/ryder
 ```
 
 The script will generate output, similar to the following:
 
 ```
-(master) $ ~/environment/aws-multi-region-bc-dr-workshop/ryder
+(master) $ ~/environment/operational-excellence-lab/ryder
 Request 0 (PUT) returned: <Response [200]>
 Request 0 (GET) returned: <Response [200]>
 Request 1 (PUT) returned: <Response [500]>

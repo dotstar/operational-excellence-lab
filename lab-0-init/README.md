@@ -169,7 +169,7 @@ Further reading:
 There are a bunch of scripts that bootstrap the workshop environment. Clone the workshop respository to pull the files down locally to your Cloud9 IDE:
 
 <pre>
-git clone https://github.com/dotstar/aws-multi-region-bc-dr-workshop.git
+git clone https://github.com/dotstar/operational-excellence-lab.git
 </pre>
 
 #### d. Run the setup script to bootstrap the workshop environment
@@ -181,7 +181,7 @@ The setup script will perform actions like install dependencies, perform an init
 Run the following commands to run the setup script.
 
 <pre>
-cd ~/environment/aws-multi-region-bc-dr-workshop
+cd ~/environment/operational-excellence-lab
 
 bootstrap/setup
 </pre>
@@ -203,7 +203,7 @@ The end-to-end time of building and deploying these services will take about 5 m
 Determine the DNS name of the load balancer.
 
 <pre>
-grep LoadBalancerDNS ~/environment/aws-multi-region-bc-dr-workshop/cfn-output.json
+grep LoadBalancerDNS ~/environment/operational-excellence-lab/cfn-output.json
 </pre>
 
 Open a new tab and browsed to that address.  In several minutes, the service becomes available.

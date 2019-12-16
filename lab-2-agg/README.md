@@ -85,7 +85,7 @@ Amazon CloudWatch Synthetics enables you to create canaries to monitor your endp
 7. Method: GET
 8. recall the URL of your Mysfits core service
    ```
-    jq < ~/environment/aws-multi-region-bc-dr-workshop/cfn-output.json -er '.LoadBalancerDNS'                                                                                          
+    jq < ~/environment/operational-excellence-lab/cfn-output.json -er '.LoadBalancerDNS'                                                                                          
    ```
 9. Add the Service endpoint URL to the URL for Canary, for example: http://alb-mm8-626376333.us-east-2.elb.amazonaws.com
 
