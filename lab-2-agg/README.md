@@ -7,17 +7,12 @@
 
 ✅ [Lab 1: Instrument Observability - Distributed Tracing with AWS X-Ray](../lab-1-xray)
 
-**Lab 2: Operationalize Observability - Aggregate Metrics**
+**Lab 2: Operationalize Observability - CloudWatch**
 * [Explore pre-configured CloudWatch dashboard](#1-explore-pre-configured-cloudwatch-dashboard)
 * [Add newly instrumented error and fault metrics from X-Ray](#2-add-newly-instrumented-error-and-fault-metrics-from-x-ray)
 
-[Lab 3: Preparing for Multi-Region Deployments](../lab-3-mr-prep)
 
-[Lab 4: Implement Traffic Management - Global Accelerator](../lab-4-globalacc)
-
-[Lab 5: Load Test and Failover your multi-region application](../lab-5-loadtest)
-
-## LAB 2 - Operationalize Observability - Aggregate Metrics
+## LAB 2 - Operationalize Observability - CloudWatch
 
 In this lab, you will start the process of aggregating metrics to understand the health of your application so you can make informed decisions about when to fail over to a different region. We will use an Amazon CloudWatch Dashboard for this.
 
@@ -89,11 +84,22 @@ Amazon CloudWatch Synthetics enables you to create canaries to monitor your endp
    ```
 9. Add the Service endpoint URL to the URL for Canary, for example: http://alb-mm8-626376333.us-east-2.elb.amazonaws.com
 
-10. Click "Create Canary" at bottom of the page.
+<details>
+  ![CloudWatch Canary](./images/canary.png)
+</details>
+<summary>Create CloudWatch Canary</summary>
+
+
+10. Leave everything else at the default, and click __"Create Canary"__ at bottom of the page.
 
    After several minutes, the Canary will begin to poll the API endpoint, and log the response time.
 
-11. Time permitting, add the Canary results to your CloudWatch Dashboard.  Hint - the value you are looking for is in All -> CloudWatchSynthetics -> mythical-core-api -> Duration.
+11. Time permitting, add the Canary results to your CloudWatch Dashboard.  
+<details>
+Hint - the value you are looking for is in All -> CloudWatchSynthetics -> mythical-core-api -> Duration.
+</details>
+<summary>Hint</summary>
+
 
 AWS announced CloudWatch Synthetics at re:Invent 2019.  The service preview is available in Ohio, Virginia, and Ireland.
 

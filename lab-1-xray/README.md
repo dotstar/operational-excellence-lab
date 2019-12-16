@@ -29,7 +29,7 @@ The Mythical Mysfits application is made up of (2) microservices:
 1. The **Mysfits service** (also referred to as the **_Core service_**) serves the Angular front-end application and hosts an API that returns Mysfit profiles from DynamoDB.
 2. The **Like service** tracks the number of likes for a particular mysfit. When a visitor clicks on the heart icon next to a mysfit in the app, a counter for that mysfit's profile is incremented in DynamoDB.
 
-Because of time constraints, we have pre-baked the micro-services instrumentation for X-Ray.  Should you like to learn more about this process, please look at the source code in  __~/environment/operational-excellence-lab/app/like-service/service/mysfits_like.py__ .  Alternatively, visit the full workshop on [github](https://github.com/aws-samples/operational-excellence-lab).
+Because of time constraints, we have pre-baked the micro-services instrumentation for X-Ray.  Should you like to learn more about this process, please look at the source code in  __~/environment/aws-multi-region-bc-dr-workshop/app/like-service/service/mysfits_like.py__ .  Alternatively, visit the full workshop on [github](https://github.com/aws-samples/aws-multi-region-bc-dr-workshop).
 
 ### Instructions
 
@@ -50,13 +50,7 @@ Now that you've instrumented the like service, you should see additional trace d
 
     ![Liked Mysfit](./images/01-04a_mysfitLike.png)
 
-3. Once you've liked a few mysfits, open a new browser tab and navigate to the [AWS X-Ray dashboard service map view](http://console.aws.amazon.com/xray/home#/service-map?timeRange=PT30M). You should see a service map representative of the Mythical Mysfits application, something like this -
-
-    ![Completed Service Map](./images/01-04a-completedServiceMap.png)
-
-    Note: It may take a minute for trace data to populate the service map. If you do not see a service map right away, keep generating requests in the app and refreshing the service map. If you do not see a service map appear after 5+ min, go back and review your Like service code to make sure it looks correct. Section 2-e has a hint with fully instrumented code for reference.
-
-4. Generate some workload on the service.  There is a workload generator in ~/environments/ryder.  Run ryder to stream GETS and PUTS to the core and like services.  The script will automatically stop after generating 2500 POST requests, so re-run as needed. `Ctrl-C` will kill the process, if desired.
+3. Generate some workload on the service.  There is a workload generator in ~/environments/ryder.  In a shell window, on Cloud9, run _ryder_ to stream GETS and PUTS to the core and like services.  The script will automatically stop after generating 2500 POST requests, so re-run as needed. `Ctrl-C` will kill the process, if desired.
 
 ```
   ~/environment/operational-excellence-lab/ryder
@@ -74,8 +68,7 @@ Request 3 (PUT) returned: <Response [200]>
 Request 4 (PUT) returned: <Response [200]>
 ```
 
-
-5. Take some time to explore the service map a bit more. See what information you can glean by clicking on each service. Also, explore the raw trace data by clicking on **Trace** in the left menu.
+4. Take some time to explore the service map a bit more. See what information you can glean by clicking on each service. Also, explore the raw trace data by clicking on **Trace** in the left menu.
 
     <details>
     <summary>Troubleshooting: Where did my service map go?</summary>
@@ -83,7 +76,7 @@ Request 4 (PUT) returned: <Response [200]>
     The X-Ray dashboard has a time range drop-down menu in the upper right hand corner. This can be a custom time period or a relative time period, e.g. Last 5 minutes. If your service map goes blank while you're exploring, you may have exceeded the specified time range. Use the drop-down menu to extend the time window if needed, i.e. try changing it to last 30 min so it displays older trace data. Or generate more traffic to the application which will populate the service map with fresh data.
     </details>
 
-You probably noticed that the **like** service has a problem.  About 25% of the time, it is returning 500 and 404 errors.
+You probably noticed that the **like** service has a problem.  About 25% of the time, it is returning 500 and 404 errors.  The like service has a bug, which causes it to periodically fail.
 
 ![Lab 1 X-Ray](./images/01-errors.png)
 
