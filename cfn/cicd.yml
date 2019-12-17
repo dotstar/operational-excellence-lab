@@ -187,7 +187,7 @@ Resources:
         BuildSpec: "buildspec_prod.yml"
       Environment:
         PrivilegedMode: true
-        ComputeType: "BUILD_GENERAL1_SMALL"
+        ComputeType: "BUILD_GENERAL1_MEDIUM"
         Image: "aws/codebuild/docker:17.09.0"
         Type: "LINUX_CONTAINER"
         EnvironmentVariables:
@@ -207,7 +207,7 @@ Resources:
         BuildSpec: "buildspec_prod.yml"
       Environment:
         PrivilegedMode: true
-        ComputeType: "BUILD_GENERAL1_SMALL"
+        ComputeType: "BUILD_GENERAL1_MEDIUM"
         Image: "aws/codebuild/docker:17.09.0"
         Type: "LINUX_CONTAINER"
         EnvironmentVariables:
