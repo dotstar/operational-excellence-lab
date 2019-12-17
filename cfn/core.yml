@@ -432,6 +432,9 @@ Resources:
       Tags:
         - Key: "Project"
           Value: "lab"
+      ClusterSettings:
+        - Name: "containerInsights"
+          Value: "enabled"
 
   MythicalServiceLogGroup:
     Type: AWS::Logs::LogGroup
