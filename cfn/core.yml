@@ -15,6 +15,17 @@ Parameters:
       - true
       - false
     Description: Choose Yes if this stack is being deployed in the disaster recovery (DR) region
+    
+  EEAssetsBucket:
+    Description: "Artifacts Bucket"
+    Type: String
+    Default: "daveaws"
+
+  EEAssetsKeyPrefix:
+    Description: "S3 prefix where assets are stored. Includes the ModuleID and version. eg modules/my_module/v1/"
+    Type: String
+    Default: "cloudformation/mm"
+
 
 Mappings:
   # Hard values for the subnet masks. These masks define
@@ -414,6 +425,7 @@ Resources:
       InstanceType: t3.small
       Name: !Sub Project-${AWS::StackName}
       SubnetId: !Ref PublicSubnetOne
+      OwnerArn: !Sub "arn:aws:sts::${AWS::AccountId}:assumed-role/TeamRole/MasterKey"
       Repositories:
         - 
           PathComponent: "/operational-excellence-lab"
@@ -750,7 +762,11 @@ Resources:
     Type: AWS::CloudFormation::Stack
     Condition: PrimaryRegion
     Properties:
-      TemplateURL: "https://mythical-mysfits-website.s3.amazonaws.com/multi-region-bcdr/cicd.yml"
+      # TemplateURL: "https://mythical-mysfits-website.s3.amazonaws.com/multi-region-bcdr/cicd.yml"
+      TemplateURL: !Sub
+        - https://s3.us-east-2.amazonaws.com/${Bucket}/${Key}/cicd.yml
+        - Bucket: !Ref EEAssetsBucket
+          Key: !Ref EEAssetsKeyPrefix
       Parameters:
         MythicalEcsCluster: !Ref MythicalEcsCluster
         CoreServiceName: !Sub ${AWS::StackName}_Core-Service
@@ -762,7 +778,11 @@ Resources:
     DependsOn: MythicalCiCdStack
     Condition: PrimaryRegion
     Properties:
-      TemplateURL: "https://mythical-mysfits-website.s3.amazonaws.com/multi-region-bcdr/cwdashboard.yml"
+      # TemplateURL: "https://mythical-mysfits-website.s3.amazonaws.com/multi-region-bcdr/cwdashboard.yml"
+      TemplateURL: !Sub
+        - https://s3.us-east-2.amazonaws.com/${Bucket}/${Key}/cwdashboard.yml
+        - Bucket: !Ref EEAssetsBucket
+          Key: !Ref EEAssetsKeyPrefix
       Parameters:
         MythicalEcsCluster: !Ref MythicalEcsCluster
         CoreServiceName: !Sub ${AWS::StackName}_Core-Service
@@ -786,115 +806,18 @@ Resources:
       EcsClusterName: !Ref MythicalEcsCluster
       SecondaryRegion: !Ref IsSecondary
 
-  # SecondaryCleanDeletionCustomResource:
-    # # Removing from secondary region for time being. Todo.
-    # Condition: SecondaryRegion
-    # Type: Custom::CleanDelete
-    # # DependsOn: CleanDeletionLambdaFunction
-    # Properties:
-      # ServiceToken: !GetAtt CleanDeletionLambdaFunction.Arn
-      # Region: !Ref AWS::Region
-      # CfnStackName: !Ref AWS::StackName
-      # CoreServiceRepo: !Ref CoreServiceRepo
-      # LikeServiceRepo: !Ref LikeServiceRepo
-      # EcsClusterName: !Ref MythicalEcsCluster
-      # SecondaryRegion: !Ref IsSecondary
 
   #Actual Lambda function to delete stuff
   CleanDeletionLambdaFunction:
     Type: AWS::Lambda::Function
     Properties:
       Code:
-        ZipFile: |
-          from __future__ import print_function
-          import boto3
-          import logging
-          import cfnresponse
-          logger = logging.getLogger()
-          logger.setLevel(logging.INFO)
-
-          ecrClient = boto3.client('ecr')
-          ecsClient = boto3.client('ecs')
-          s3 = boto3.resource('s3')
-
-          def handler(event, context):
-              print(event)
-              CoreServiceEcrRepo = event['ResourceProperties']['CoreServiceRepo']
-              LikeServiceEcrRepo = event['ResourceProperties']['LikeServiceRepo']
-              EcsClusterName = event['ResourceProperties']['EcsClusterName']
-
-              CfnStackName = event['ResourceProperties']['CfnStackName']
-              IsSecondary = event['ResourceProperties']['SecondaryRegion']
-              if IsSecondary == 'false':
-                  MythicalArtifactBucket = event['ResourceProperties']['MythicalArtifactBucket']
-              logger.debug('Event: {}'.format(event))
-              logger.debug('Context: {}'.format(context))
-              tempResponse = []
-              responseData = {}
-              failure = False
-              # Immediately respond on Delete
-              if event['RequestType'] == 'Delete':
-                  try:
-                      coreDeleteResponse = ecrClient.delete_repository(
-                          repositoryName=CoreServiceEcrRepo,
-                          force=True)
-                  except Exception as e:
-                      if "RepositoryNotFoundException" in str(e):
-                          failure = False
-                      else:
-                          failure = True
-                      tempResponse.append({CoreServiceEcrRepo:str(e)})
-                  try:
-                      likeDeleteResponse = ecrClient.delete_repository(
-                          repositoryName=LikeServiceEcrRepo,
-                          force=True)
-                  except Exception as e:
-                      if "RepositoryNotFoundException" in str(e):
-                          failure = False
-                      else:
-                          failure = True
-                      tempResponse.append({LikeServiceEcrRepo:str(e)})
-
-                  if IsSecondary == 'false':
-                      try:
-                          bucket = s3.Bucket(MythicalArtifactBucket)
-                          # Delete S3 bucket
-                          for key in bucket.objects.all():
-                            key.delete()
-                          bucket.delete()
-                      except Exception as e:
-                          if "The specified bucket does not exist" in str(e):
-                              failure = False
-                          else:
-                              failure = True
-                          tempResponse.append({MythicalArtifactBucket:str(e)})
-                      try:
-                          # List ECS Services and delete services in a specific cluster
-                          ecsServicesToDelete = ecsClient.list_services(
-                              cluster=EcsClusterName
-                          )
-                          if ecsServicesToDelete['serviceArns'] != []:
-                              for serviceName in ecsServicesToDelete['serviceArns']:
-                                  ecsDeleteResponse = ecsClient.delete_service(
-                                      cluster=EcsClusterName,
-                                      service=serviceName,
-                                      force=True)
-                      except Exception as e:
-                          failure = True
-                          tempResponse.append({EcsClusterName:str(e)})
-                  responseData['Data'] = str(tempResponse)
-                  if failure == False:
-                      cfnresponse.send(event, context, cfnresponse.SUCCESS, responseData, 'CustomResourcePhysicalID')
-                  else:
-                      cfnresponse.send(event, context, cfnresponse.FAILED, responseData, 'CustomResourcePhysicalID')
-
-              if event['RequestType'] == 'Update' or event['RequestType'] == 'Create':
-                  try:
-                      responseData = {}
-                      cfnresponse.send(event, context, cfnresponse.SUCCESS, responseData, 'CustomResourcePhysicalID')
-                  except Exception as e:
-                      cfnresponse.send(event, context, cfnresponse.FAILED, responseData, 'CustomResourcePhysicalID')
-      Handler: index.handler
+        S3Bucket: !Ref EEAssetsBucket
+        S3Key: !Sub 
+          - ${Key}/CleanDeletionLambdaFunction.zip
+          - { Key: !Ref EEAssetsKeyPrefix }
+        # S3Key: "cloudformation/mm/CleanDeletionLambdaFunction.zip"
+      Handler: CleanDeletionLambdaFunction.handler   
       Role:
         !If [PrimaryRegion, !GetAtt 'LambdaExecutionRole.Arn', !GetAtt 'SecondaryLambdaExecutionRole.Arn']
       Runtime: python3.7
@@ -929,6 +852,8 @@ Resources:
             Action:
             - ecr:*
             - ecs:ListServices
+            - ecs:PutAccountSetting
+            - ecs:PutAccountSettingDefault
             Resource: '*'
           - Effect: Allow
             Action:
