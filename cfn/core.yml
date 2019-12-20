@@ -25,6 +25,13 @@ Parameters:
     Description: "S3 prefix where assets are stored. Includes the ModuleID and version. eg modules/my_module/v1/"
     Type: String
     Default: "cloudformation/mm"
+    
+  IsEventEngine:
+    Type: String
+    Default: false
+    AllowedValues:
+      - true
+      - false
 
 
 Mappings:
@@ -56,6 +63,8 @@ Mappings:
 Conditions:
   PrimaryRegion: !Equals [ !Ref IsSecondary, false ]
   SecondaryRegion: !Equals [ !Ref IsSecondary, true ]
+  EventEngine: !Equals [ !Ref IsEventEngine, true]
+  NotEventEngine: !Equals [ !Ref IsEventEngine, false]
 
 Resources:
   # VPC in which containers will be networked.
@@ -417,9 +426,9 @@ Resources:
         - AttributeName: MysfitId
           KeyType: HASH
 
-  MythicalEnvironment:
+  EEMythicalEnvironment:
     Type: AWS::Cloud9::EnvironmentEC2
-    Condition: PrimaryRegion
+    Condition: EventEngine
     Properties:
       AutomaticStopTimeMinutes: 30
       InstanceType: t3.small
@@ -430,6 +439,21 @@ Resources:
         - 
           PathComponent: "/operational-excellence-lab"
           RepositoryUrl: "https://github.com/dotstar/operational-excellence-lab"
+
+  MythicalEnvironment:
+    Type: AWS::Cloud9::EnvironmentEC2
+    Condition: NotEventEngine
+    Properties:
+      AutomaticStopTimeMinutes: 30
+      InstanceType: t3.small
+      Name: !Sub Project-${AWS::StackName}
+      SubnetId: !Ref PublicSubnetOne
+      Repositories:
+        - 
+          PathComponent: "/operational-excellence-lab"
+          RepositoryUrl: "https://github.com/dotstar/operational-excellence-lab"
+
+
 
   CoreServiceRepo:
     Type: AWS::ECR::Repository

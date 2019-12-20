@@ -1,4 +1,4 @@
-stackName=m3
+stackName=l8
 bucket=daveaws/cloudformation/mm
 all: core
 
@@ -9,6 +9,7 @@ test:
 	aws cloudformation create-stack \
 	  --stack-name ${stackName} \
 	  --template-url https://s3.amazonaws.com/${bucket}/lambdatest.yml \
+  	  --timeout-in-minutes 5 \
 	  --capabilities CAPABILITY_NAMED_IAM CAPABILITY_IAM --region us-east-2
 
 push:
@@ -30,6 +31,7 @@ core: push
 	aws cloudformation create-stack \
 	  --stack-name ${stackName} \
 	  --template-url https://s3.amazonaws.com/${bucket}/core.yml \
+	  --timeout-in-minutes 5 \
 	  --capabilities CAPABILITY_NAMED_IAM CAPABILITY_IAM --region us-east-2
 
 delete:
